@@ -1,26 +1,29 @@
 # ZN-M2 Wired
 
-面向 **ZN-M2 / 256 MiB RAM / 纯有线网关**的 ImmortalWrt 构建配方。仓库提供固定版本的源码入口、精简配置、板级补丁、镜像检查工具和可选服务示例。
+为 **256 MiB 内存的 ZN-M2 路由器**制作精简的纯有线 ImmortalWrt 固件，适合通过交换机连接电脑或服务器，提供路由、透明代理、HTTPS 反向代理和远程访问。
 
-用途是少量服务器的软件更新、API 访问、透明代理、HTTPS 反代及远程管理。构建基于 [VIKINGYFY/immortalwrt](https://github.com/VIKINGYFY/immortalwrt)，应用来自 ImmortalWrt 和 Openwrt-Passwall feeds；具体提交与下载哈希见 [sources.lock.json](sources.lock.json)。
+项目以轻并发使用为目标，通过去除无线及不需要的驱动、使用单个代理核心，为常用服务留出内存。仓库包含构建脚本、固定版本的源码配置、补丁和使用示例；目前需要自行编译。
 
-**当前状态：源码开发版 `0.1.0-dev`，已完成一次完整编译、镜像静态检查及预置身份检查；尚未刷入实机验证。** 本仓库的公开配置与此前实机验证的内部基线有差异，不能把内部基线的测试结果直接当作本版镜像已验收。当前验证范围见 [docs/VALIDATION.md](docs/VALIDATION.md)。本仓库不包含预编译固件、代理节点、账号、证书私钥或任何 Tailscale 设备身份，也不会自动刷机。
+构建基于 [VIKINGYFY/immortalwrt](https://github.com/VIKINGYFY/immortalwrt)，应用来自 ImmortalWrt 和 Openwrt-Passwall 软件源。具体提交与下载哈希见 [sources.lock.json](sources.lock.json)。
+
+**当前版本 `0.1.0-dev` 已完成完整编译和镜像静态检查，尚未完成该版本的实机验收。** 具体结果和待验证项目见 [验证说明](docs/VALIDATION.md)。
 
 ## 功能与取舍
 
 | 项目 | 配置 |
 | --- | --- |
-| 目标 | `qualcommax/ipq60xx`，设备 `zn_m2`，DT compatible `zn,m2` |
+| 支持设备 | ZN-M2；构建目标 `qualcommax/ipq60xx`，设备 `zn_m2` |
 | 管理与基础网络 | LuCI、SSH、firewall4、dnsmasq-full、DHCP |
-| 透明代理 | Passwall + 单 Xray；固定版本支持 VLESS、Hysteria2 |
-| 附加服务 | Tailscale、Nginx TLS/反代、microsocks、acme.sh DNS API |
+| 透明代理 | Passwall + Xray，支持 VLESS、Hysteria2，两种协议共用一个核心 |
+| 远程访问 | Tailscale 组网、microsocks SOCKS5 代理 |
+| 网站服务 | Nginx HTTPS/反向代理、acme.sh 证书申请与续期工具 |
 | 内存策略 | 小容量 RAM 日志、DNS 缓存 1000、单个代理核心、64 MiB zram 上限 |
-| 板级策略 | 纯有线 DT 布局，关闭 WLAN remoteproc，回收不用的 16 MiB NSS 保留区，CPU 最高 1.2 GHz |
-| 未提供 | Wi-Fi、NSS 加速、USB/PCI/MMC/SCSI 相关扩展、PPPoE、Lucky、独立 Hysteria/sing-box、校园认证客户端、UPnP、DDNS |
+| 硬件裁剪 | 关闭无线子系统和 NSS 加速，回收不用的 16 MiB NSS 保留内存；CPU 最高 1.2 GHz |
+| 未包含的常见功能 | Wi-Fi、USB 扩展、PPPoE 拨号、UPnP、DDNS |
 
-zram 是使用实际 RAM 保存压缩页的交换区，不是额外获得 64 MiB 物理内存。这里的内存策略针对本板型和轻并发负载，不承诺任意业务规模、所有协议组合或千兆加密吞吐。
+上述应用已包含在构建配置中，需要自行配置后启用。实际内存占用取决于连接数、代理规则和流量；项目不承诺千兆加密代理吞吐。zram 使用 RAM 保存压缩页，64 MiB 是交换区容量上限，不代表增加了同等物理内存。
 
-**需要无线、USB 或 PPPoE 的用户不适合此配置。** 本配方只验证指定设备；补丁会修改共享 target 默认值，不应将同一构建树用于其他板型。首次从原厂系统刷入、不同引导程序/分区布局的兼容性不在当前验证范围内。
+**当前配置不适用于需要无线、USB 或 PPPoE 拨号的用途。** 补丁针对 ZN-M2，并会修改共享的构建目标默认值，请为其他设备使用独立构建目录。首次从原厂系统刷入、不同引导程序或分区布局的兼容性尚未验证。
 
 ## 构建环境
 
@@ -35,11 +38,11 @@ sudo apt install -y build-essential clang flex bison g++ gawk gettext git \
   rsync swig unzip file wget curl ca-certificates patch perl xz-utils zstd
 ```
 
-还需要访问锁定的 GitHub 仓库、Go 下载站及软件包源码站。不要以 root 运行构建脚本。脚本不会读取桌面密钥环、私人代理订阅、SSH 配置或任何路由器备份。
+构建时需要访问 GitHub、Go 下载站及软件包源码站。请使用普通用户运行构建脚本。
 
 ## 获取与检查仓库
 
-将下方占位符替换成你发布此仓库后的 URL：
+将 `<仓库URL>` 替换为当前仓库的 Git 克隆地址：
 
 ```sh
 git clone <仓库URL> znm2-wired
@@ -47,7 +50,7 @@ cd znm2-wired
 python3 tests/check_repository.py
 ```
 
-离线检查涵盖语法、固定源码提交、配置约束及有限敏感信息模式；不等于完整的许可证审计或 secrets 扫描。
+这一步检查脚本语法、源码版本、配置约束和部分敏感信息模式，不需要编译固件。
 
 ## 准备源码和配置
 
@@ -57,10 +60,10 @@ python3 scripts/build.py --work-dir /path/to/znm2-build --prepare-only
 
 脚本会：
 
-1. 从公开上游获取完整 commit 指定的主源码和四个 feeds，检出 detached HEAD。
+1. 按锁定的提交获取主源码和四个软件源（feeds）。
 2. 检查并应用 `patches/` 中的补丁。
 3. 下载并校验固定 SHA256 的 Go bootstrap。
-4. 安装选定的 feeds 和无身份的默认文件，移除依赖未提供 Geo 数据库的 Passwall 示例节点。
+4. 安装选定的软件包定义和默认配置，移除缺少 Geo 数据库依赖的 Passwall 示例节点。
 5. 执行 `make defconfig` 并检查最终依赖展开，输出 `config-check.json`。
 
 首次使用必须提供空工作目录。脚本不覆盖已有构建；已成功准备的同一目录可继续编译。配方或准备后的配置改变时，应换一个新的工作目录，避免把不同版本混在一起。
@@ -73,7 +76,7 @@ python3 scripts/build.py --work-dir /path/to/znm2-build --prepare-only \
   --dl-cache /path/to/openwrt-source-archives
 ```
 
-`--go-cache` 中的文件仍必须通过大小和 SHA256 校验；`--dl-cache` 只复制源码归档，软件包下载由上游构建系统校验。不要把旧工具链、`build_dir`、`staging_dir` 或私人配置作为缓存输入。
+`--go-cache` 中的文件仍必须通过大小和 SHA256 校验；`--dl-cache` 只复制源码归档，软件包下载由上游构建系统校验。缓存参数不用于复用旧工具链或编译中间文件。
 
 ## 编译和检查镜像
 
@@ -88,22 +91,22 @@ python3 scripts/build.py --work-dir /path/to/znm2-build --jobs 8
 /path/to/znm2-build/verification/result.json
 ```
 
-检查包括软件包/版本、内核裁剪、DT 保留区与 CPU/端口定义、固件格式与哈希、AArch64 可执行文件、无设备身份的默认状态。检查成功仅表示静态合同通过，仍需实机联网与恢复验证。
+编译完成后会自动检查软件包版本、内核配置、设备树的内存与端口定义、镜像格式及默认配置。静态检查通过后，仍需在实际设备上验证联网、服务运行和重启恢复。
 
-构建可重复使用固定输入，但本项目尚不承诺不同机器产生逐字节相同的镜像。修改配方、工具链或默认配置后，应使用新版本号与新的测试记录。不要在这个自定义内核上盲目安装滚动快照的 kmod，内核 ABI 可能不匹配；优先重新构建一致的软件包/镜像。
+本项目固定源码和配置版本，但尚不保证不同机器生成逐字节相同的镜像。修改配置或工具链后，需要重新记录验证结果。安装额外内核模块（kmod）时应使用同次构建的匹配软件包，其他快照软件源中的模块可能与本固件内核不兼容。
 
 ## 刷机和首次访问
 
-脚本不执行 SSH 或刷机。先阅读 [docs/INSTALL.md](docs/INSTALL.md)，确认板型、引导程序、分区布局、备份及恢复方式，并保留可靠有线管理通道。
+刷机前请阅读 [安装说明](docs/INSTALL.md)，确认板型、引导程序、分区布局、备份及恢复方式，并保留可靠的有线管理连接。构建脚本只生成镜像，刷机需要手动执行。
 
-新配置的默认状态：
+全新安装后的默认配置：
 
-- LAN：`192.168.8.1/24`，WAN：DHCP，不克隆 MAC。
+- LAN：`192.168.8.1/24`，WAN：通过 DHCP 自动获取地址，使用设备原有 MAC。
 - 默认主机名 `ZN-M2-Wired`，时区 `Asia/Shanghai`。
-- Passwall、Tailscale、Nginx、ACME 默认禁用，未配置个人密码或节点。
+- Passwall、Tailscale、Nginx、ACME 默认禁用，配置完成后按需启用。
 - WAN 不默认开放网页管理、SSH 或 SOCKS；首先从受信任 LAN 设置 root 密码。
-- 只读镜像没有 Tailscale 身份；每台设备必须自行授权。
-- 默认包含 WAN DNS 前置保护和 Tailscale 自身流量的 Passwall 旁路规则。
+- 使用 Tailscale 时需要登录自己的账号并授权设备。
+- 阻止从 WAN 访问路由器的 DNS 服务；路由器自身的 Tailscale 流量绕过 Passwall。
 
 用有线客户端访问 `http://192.168.8.1/` 完成基础设置。若上游也使用该网段，先修改 LAN 避免重叠。防护规则假定此板型的物理 WAN 设备名为 `wan`；更改拓扑时应重新检查。
 
@@ -124,7 +127,7 @@ python3 scripts/build.py --work-dir /path/to/znm2-build --jobs 8
 sources.lock.json        上游 URL、commit、Go bootstrap 哈希
 configs/                 单一纯有线 profile
 patches/                 可审查的板级/裁剪补丁
-files/                   无身份的首次启动与 nftables 文件
+files/                   首次启动默认配置与防火墙规则
 scripts/                 获取、构建与静态镜像验证
 examples/                可选服务示例，不会自动打包启用
 tests/                   离线仓库检查
