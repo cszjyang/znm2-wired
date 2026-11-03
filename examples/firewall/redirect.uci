@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Documentation only. Replace 192.0.2.10 with your real LAN server address.
+# Add deliberately through LuCI/UCI; do not replace the firewall configuration.
+config redirect 'example_ssh'
+    option enabled '0'
+    option name 'Example SSH forward'
+    option src 'wan'
+    option src_dport '2222'
+    option dest 'lan'
+    option dest_ip '192.0.2.10'
+    option dest_port '22'
+    option proto 'tcp'
+    option target 'DNAT'

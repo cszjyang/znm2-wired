@@ -1,0 +1,42 @@
+{
+  "format": 1,
+  "profile": "zn-m2-wired-256m",
+  "version": "0.1.0-dev",
+  "source": {
+    "url": "https://github.com/VIKINGYFY/immortalwrt.git",
+    "commit": "4bec1cbf12d144f538b5e88102bee542fd089920"
+  },
+  "feeds": {
+    "packages": {
+      "url": "https://github.com/immortalwrt/packages.git",
+      "commit": "72c7391fb2d04080afd0bfe919605749f81eb747"
+    },
+    "luci": {
+      "url": "https://github.com/immortalwrt/luci.git",
+      "commit": "05c955f0aca2f5e8de1c126b0ec9e9e677e83b3f"
+    },
+    "passwall_packages": {
+      "url": "https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git",
+      "commit": "d3230c7645d8f046039c84161c9384ae81a294f2"
+    },
+    "passwall": {
+      "url": "https://github.com/Openwrt-Passwall/openwrt-passwall.git",
+      "commit": "5fd61e34419729277174a2476a49e26bcef33736"
+    }
+  },
+  "go_bootstrap": {
+    "metadata_url": "https://go.dev/dl/?mode=json&include=all",
+    "filename": "go1.27.2.linux-amd64.tar.gz",
+    "os": "linux",
+    "arch": "amd64",
+    "version": "go1.27.2",
+    "sha256": "ecbadb99091a3f46e31f5f934b068b1864eafa7995211b39eaddf76996045fe5",
+    "size": 70590635,
+    "kind": "archive"
+  },
+  "expected_packages": {
+    "xray-core": "26.10.21",
+    "tailscale": "1.104.1",
+    "luci-app-passwall": "26.10.22"
+  }
+}

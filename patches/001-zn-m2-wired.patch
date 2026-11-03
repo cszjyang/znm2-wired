@@ -1,0 +1,113 @@
+diff --git a/target/linux/qualcommax/Makefile b/target/linux/qualcommax/Makefile
+index 3ba22ae..bb1dde2 100644
+--- a/target/linux/qualcommax/Makefile
++++ b/target/linux/qualcommax/Makefile
+@@ -12,11 +12,7 @@ KERNEL_PATCHVER:=6.18
+ 
+ include $(INCLUDE_DIR)/target.mk
+ DEFAULT_PACKAGES += \
+-	autocore automount cpufreq e2fsprogs f2fs-tools losetup luci uboot-envtools wpad-openssl \
+-	kmod-ath11k kmod-ath11k-ahb kmod-ath11k-pci kmod-dsa kmod-dsa-qca8k kmod-phy-aquantia kmod-phy-qca83xx \
+-	kmod-fs-ext4 kmod-fs-f2fs kmod-gpio-button-hotplug kmod-leds-gpio kmod-leds-pwm \
+-	kmod-usb3 kmod-usb-dwc3 kmod-usb-dwc3-qcom kmod-usb-serial-qualcomm \
+-	tc-tiny kmod-sched-flower kmod-sched-prio kmod-sched-act-police \
+-	kmod-sched-act-pedit kmod-sched-mqprio kmod-sched-ets kmod-sched-act-vlan dcb
++	luci uboot-envtools kmod-dsa kmod-phy-qca83xx \
++	kmod-gpio-button-hotplug kmod-leds-gpio
+ 
+ $(eval $(call BuildTarget))
+diff --git a/target/linux/qualcommax/dts/ipq6000-cmiot.dtsi b/target/linux/qualcommax/dts/ipq6000-cmiot.dtsi
+index ce3aade..94ab030 100644
+--- a/target/linux/qualcommax/dts/ipq6000-cmiot.dtsi
++++ b/target/linux/qualcommax/dts/ipq6000-cmiot.dtsi
+@@ -1,8 +1,8 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+ 
+-#include "ipq6018.dtsi"
++#include "ipq6018-nowifi.dtsi"
+ #include "ipq6018-ess.dtsi"
+-#include "ipq6018-nss.dtsi"
++/* Wired-only build uses EDMA/DSA, no NSS accelerator. */
+ #include "ipq6018-common.dtsi"
+ 
+ #include <dt-bindings/gpio/gpio.h>
+diff --git a/target/linux/qualcommax/dts/ipq6000-m2.dts b/target/linux/qualcommax/dts/ipq6000-m2.dts
+index 4264864..8061d51 100644
+--- a/target/linux/qualcommax/dts/ipq6000-m2.dts
++++ b/target/linux/qualcommax/dts/ipq6000-m2.dts
+@@ -57,7 +57,22 @@
+ };
+ 
+ &wifi {
+-	status = "okay";
++	status = "disabled";
+ 	qcom,ath11k-fw-memory-mode = <1>;
+ 	qcom,ath11k-calibration-variant = "ZN-M2";
+-};
+\ No newline at end of file
++};
++/* Wired-only: no WLAN remote processor, USB or external PCIe devices. */
++&q6v5_wcss { status = "disabled"; };
++&usb3 { status = "disabled"; };
++&qusb_phy_0 { status = "disabled"; };
++&ssphy_0 { status = "disabled"; };
++&pcie_phy { status = "disabled"; };
++/* Previously validated wired-only layout: reclaim unused NSS reservation. */
++/delete-node/ &nss_region;
++&cpu_opp_table {
++    opp-1320000000 { status = "disabled"; };
++    opp-1440000000 { status = "disabled"; };
++    opp-1512000000 { status = "disabled"; };
++    opp-1608000000 { status = "disabled"; };
++    opp-1800000000 { status = "disabled"; };
++};
+diff --git a/target/linux/qualcommax/image/ipq60xx.mk b/target/linux/qualcommax/image/ipq60xx.mk
+index 8f13a6b..6695c37 100644
+--- a/target/linux/qualcommax/image/ipq60xx.mk
++++ b/target/linux/qualcommax/image/ipq60xx.mk
+@@ -480,7 +480,7 @@ define Device/zn_m2
+ 	DEVICE_MODEL := M2
+ 	SOC := ipq6000
+ 	DEVICE_DTS_CONFIG := config@cp03-c1
+-	DEVICE_PACKAGES := ipq-wifi-zn_m2
++	DEVICE_PACKAGES :=
+ endef
+ TARGET_DEVICES += zn_m2
+ 
+diff --git a/target/linux/qualcommax/ipq60xx/config-default b/target/linux/qualcommax/ipq60xx/config-default
+index 36a3e5d..77c8a2a 100644
+--- a/target/linux/qualcommax/ipq60xx/config-default
++++ b/target/linux/qualcommax/ipq60xx/config-default
+@@ -16,3 +16,20 @@ CONFIG_REGULATOR_CPR3=y
+ # CONFIG_REGULATOR_CPR3_NPU is not set
+ CONFIG_REGULATOR_CPR4_APSS=y
+ CONFIG_REGULATOR_QCOM_SMD_RPM=y
++# CONFIG_USB is not set
++# CONFIG_USB_COMMON is not set
++# CONFIG_USB_SUPPORT is not set
++# CONFIG_PHY_QCOM_QMP_USB is not set
++# CONFIG_PHY_QCOM_QUSB2 is not set
++# CONFIG_MMC is not set
++# CONFIG_MMC_BLOCK is not set
++# CONFIG_SCSI is not set
++# CONFIG_SCSI_COMMON is not set
++# CONFIG_PCI is not set
++# CONFIG_PCIE_QCOM is not set
++# CONFIG_PCIE_QCOM_COMMON is not set
++# CONFIG_QCOM_Q6V5_WCSS_SEC is not set
++# CONFIG_QCOM_Q6V5_WCSS is not set
++# CONFIG_QCOM_Q6V5_MPD is not set
++# CONFIG_QCOM_Q6V5_COMMON is not set
++# CONFIG_QCOM_RPROC_COMMON is not set
+diff --git a/target/linux/qualcommax/ipq60xx/target.mk b/target/linux/qualcommax/ipq60xx/target.mk
+index 5fd4363..7079b01 100644
+--- a/target/linux/qualcommax/ipq60xx/target.mk
++++ b/target/linux/qualcommax/ipq60xx/target.mk
+@@ -1,6 +1,6 @@
+ SUBTARGET:=ipq60xx
+ BOARDNAME:=Qualcomm Atheros IPQ60xx
+-DEFAULT_PACKAGES += ath11k-firmware-ipq6018-ddwrt
++
+ 
+ define Target/Description
+ 	Build firmware images for Qualcomm Atheros IPQ60xx based boards.

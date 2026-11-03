@@ -1,0 +1,12 @@
+{
+  "profile": "zn-m2-wired-256m",
+  "status": "checks_pending",
+  "repository_checks_passed": false,
+  "public_source_fetch_passed": false,
+  "patch_application_passed": false,
+  "expanded_config_check_passed": false,
+  "full_public_recipe_build_completed": false,
+  "public_image_static_validation_passed": false,
+  "public_image_runtime_tested": false,
+  "upstream_internal_baseline_is_not_public_image_validation": true
+}

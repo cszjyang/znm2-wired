@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-only
+config service 'main'
+    option enabled '0'
+    option listen '127.0.0.1'
+    option port '1080'

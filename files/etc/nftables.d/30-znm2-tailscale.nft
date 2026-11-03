@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Tailscale owns bits 16..23 (0x80000); Passwall bypass uses the low byte.
+# Preserve Tailscale's routing bits and mark only its own outer transport.
+# This runs before Passwall's output hook (priority -151).
+chain znm2_tailscale_bypass {
+    type route hook output priority -152; policy accept;
+    meta mark & 0x00ff0000 == 0x00080000 counter meta mark set meta mark | 0x000000ff comment "znm2: Tailscale outer transport bypasses Passwall"
+}

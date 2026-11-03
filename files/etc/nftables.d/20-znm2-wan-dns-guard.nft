@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Passwall classifies RFC1918 source addresses as local networks. With a private
+# test uplink, its DNS redirect can run before fw4 and obtain DNAT acceptance.
+# Enforce the intended WAN boundary before proxy interception and destination NAT.
+chain znm2_wan_dns_guard {
+    type filter hook prerouting priority -160; policy accept;
+    iifname "wan" tcp dport 53 counter drop comment "znm2: no WAN DNS service";
+    iifname "wan" udp dport 53 counter drop comment "znm2: no WAN DNS service";
+}
