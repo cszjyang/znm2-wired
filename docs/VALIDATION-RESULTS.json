@@ -1,12 +1,55 @@
 {
   "profile": "zn-m2-wired-256m",
-  "status": "checks_pending",
-  "repository_checks_passed": false,
-  "public_source_fetch_passed": false,
-  "patch_application_passed": false,
-  "expanded_config_check_passed": false,
-  "full_public_recipe_build_completed": false,
-  "public_image_static_validation_passed": false,
+  "status": "clean_build_and_static_checks_passed_runtime_pending",
+  "verified_date": "2026-11-03",
+  "repository_checks_passed": true,
+  "privacy_gate_negative_tests_passed": true,
+  "public_source_fetch_passed": true,
+  "patch_application_passed": true,
+  "expanded_config_check_passed": true,
+  "full_public_recipe_build_completed": true,
+  "public_image_static_validation_passed": true,
+  "image_identity_checks_passed": true,
   "public_image_runtime_tested": false,
-  "upstream_internal_baseline_is_not_public_image_validation": true
+  "upstream_internal_baseline_is_not_public_image_validation": true,
+  "build_elapsed_seconds": 2019.0,
+  "build_input_sha256": "0ff680e582b5ea4752bee0999c6458b6f9c321be880b231f29bb64ba2b4b1646",
+  "build_host_architecture": "x86_64",
+  "python_version": "3.10.12",
+  "fresh_toolchain_and_build_directories": true,
+  "source_archive_cache_used": true,
+  "old_compiled_objects_reused": false,
+  "image_packages": 173,
+  "application_versions": {
+    "xray-core": "26.10.21-r1",
+    "tailscale": "1.104.1-r1",
+    "luci-app-passwall": "26.10.22-r2"
+  },
+  "component_sha256": {
+    "kernel_uncompressed": "5a4d2750ee062d83255ffd226b99ad89952462668fae2611cf736c6d8adb8b35",
+    "kernel_compressed": "49b2011d839a09793edaa7e19baf5a566008352f0493f9d507e52f41ab869d7d",
+    "board_dtb": "9b2e9ae6879eea1066c10a3eb9588bda0f57ea0bead3d98681e917ef56dda902",
+    "rootfs_squashfs": "fc83dc056271a50253c3caa820e4ee10bc73e9fdd7f85965b3ff38d4002bc915"
+  },
+  "images": [
+    {
+      "name": "zn-m2-wired-0.1.0-dev-wired-256m-qualcommax-ipq60xx-zn_m2-squashfs-sysupgrade.bin",
+      "bytes": 31211771,
+      "sha256": "d057eb206b13a5346f0e5c4e695ae78c253eb119a76ae626e7326311b67b6af8"
+    },
+    {
+      "name": "zn-m2-wired-0.1.0-dev-wired-256m-qualcommax-ipq60xx-zn_m2-squashfs-factory.ubi",
+      "bytes": 32636928,
+      "sha256": "83fdc5fc3d3da646a296fa790de04b3344e5bcd97ae248f8acfa71b931c9c3cb"
+    },
+    {
+      "name": "zn-m2-wired-0.1.0-dev-wired-256m-qualcommax-ipq60xx-zn_m2-initramfs-uImage.itb",
+      "bytes": 29561716,
+      "sha256": "de8cafd98de295d49740bfdbfae70db60a417674232897f6ecf3b19988170d79"
+    }
+  ],
+  "remaining": [
+    "Actual public image installation and runtime validation",
+    "Complete third-party source/license review before binary redistribution"
+  ]
 }

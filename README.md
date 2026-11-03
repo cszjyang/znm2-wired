@@ -4,7 +4,7 @@
 
 用途是少量服务器的软件更新、API 访问、透明代理、HTTPS 反代及远程管理。构建基于 [VIKINGYFY/immortalwrt](https://github.com/VIKINGYFY/immortalwrt)，应用来自 ImmortalWrt 和 Openwrt-Passwall feeds；具体提交与下载哈希见 [sources.lock.json](sources.lock.json)。
 
-**当前状态：源码整理版 `0.1.0-dev`。** 本仓库的公开配置与此前实机验证的内部基线有差异，不能把内部基线的测试结果直接当作本版镜像已验收。当前验证范围见 [docs/VALIDATION.md](docs/VALIDATION.md)。本仓库不包含预编译固件、代理节点、账号、证书私钥或任何 Tailscale 设备身份，也不会自动刷机。
+**当前状态：源码开发版 `0.1.0-dev`，已完成一次完整编译、镜像静态检查及预置身份检查；尚未刷入实机验证。** 本仓库的公开配置与此前实机验证的内部基线有差异，不能把内部基线的测试结果直接当作本版镜像已验收。当前验证范围见 [docs/VALIDATION.md](docs/VALIDATION.md)。本仓库不包含预编译固件、代理节点、账号、证书私钥或任何 Tailscale 设备身份，也不会自动刷机。
 
 ## 功能与取舍
 
@@ -113,7 +113,7 @@ python3 scripts/build.py --work-dir /path/to/znm2-build --jobs 8
 
 - **Passwall**：在 LuCI 中添加自己的 Xray 节点，选择 VLESS 或 Hysteria2，检查 DNS/分流后启用。无需额外 Hysteria2 核心。
 - **Tailscale**：启用服务后运行 `tailscale up --accept-dns=false --accept-routes=false --hostname=znm2-wired`，自行完成授权。默认不发布子网路由、不做出口节点、不启用 Tailscale SSH。
-- **HTTPS 反代**：修改 `examples/nginx/`，自行安装域名证书，先运行 `nginx -t`，再启用服务。示例地址使用文档专用地址，不能不修改就投入使用。
+- **HTTPS 反代**：修改 `examples/nginx/`，自行安装域名证书，按服务文档关闭 UCI 配置生成并检查手写配置，再启用服务。示例地址使用文档专用地址，不能不修改就投入使用。
 - **SOCKS**：`examples/microsocks/` 提供默认停用、仅绑定回环的可选服务。对外开放和认证策略由使用者明确设计。
 - **端口转发**：在 LuCI 添加指定目标/端口；`examples/firewall/` 说明配置字段。不自动导入整个防火墙文件。
 - **证书续期**：已包含 acme.sh 和 DNS API；凭据只放在设备私密配置中，续期成功后验证证书并重载 Nginx。不要提交凭据或私钥。

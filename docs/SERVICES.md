@@ -44,10 +44,14 @@ tailscale netcheck
 安装自己的 fullchain 与私钥到示例指定目录，私钥权限设为 `600`。然后：
 
 ```sh
-nginx -t
+uci set nginx.global.uci_enable='false'
+uci commit nginx
+nginx -t -c /etc/nginx/nginx.conf
 /etc/init.d/nginx enable
 /etc/init.d/nginx restart
 ```
+
+这里关闭 Nginx 包默认的 UCI 配置生成，让服务实际加载你安装的手写 `nginx.conf`。只有语法和证书检查通过后才执行后续启用、重启命令。
 
 先从 LAN 测试登录、跳转、WebSocket/SSE 与上传下载，再根据需要添加 WAN 入口规则。HTTPS 上游应配置正确的 SNI 和受信任 CA；不要把关闭上游证书校验当作通用默认。
 
