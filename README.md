@@ -36,10 +36,10 @@ sudo apt install -y build-essential clang flex bison g++ gawk gettext git \
   rsync swig unzip file wget curl ca-certificates patch perl xz-utils zstd
 ```
 
-将 `<仓库URL>` 替换为当前仓库的 Git 克隆地址，选择一个全新的工作目录：
+克隆仓库，并选择一个全新的构建工作目录：
 
 ```sh
-git clone <仓库URL> znm2-wired
+git clone https://github.com/cszjyang/znm2-wired.git
 cd znm2-wired
 python3 tests/check_repository.py
 python3 scripts/build.py --work-dir /path/to/znm2-build --jobs 8
