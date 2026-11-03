@@ -13,3 +13,4 @@ jobs:
         with:
           persist-credentials: false
       - run: python3 tests/check_repository.py
+      - run: python3 tests/test_privacy_gate.py
