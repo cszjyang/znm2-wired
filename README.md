@@ -4,7 +4,7 @@
 
 项目面向轻并发使用，通过去除无线及不需要的驱动、使用单个代理核心，为常用服务留出内存。目前提供构建脚本、配置和使用示例，需要自行编译。
 
-**`0.1.0-dev` 已完成完整编译和镜像静态检查，尚未完成该版本的实机验收。** 测试结果和待验证项目见 [验证说明](docs/VALIDATION.md)。
+当前版本：`0.1.0-dev`。构建与测试记录见 [验证说明](docs/VALIDATION.md)。
 
 ## 功能与取舍
 
@@ -17,15 +17,15 @@
 | HTTPS 网站与反向代理 | Nginx，附反代配置示例 |
 | 证书申请与续期 | acme.sh 与 DNS API 支持，需要自行配置域名和凭据 |
 
-**本配置不包含 Wi-Fi、USB 扩展、PPPoE 拨号、UPnP 和 DDNS。** 需要无线接入时，可由独立 AP 提供；需要其他被裁剪的功能时，应选择相应的固件配置。
+精简范围包括 Wi-Fi、USB 扩展、PPPoE 拨号、UPnP 和 DDNS，这些功能未包含在构建配置中。无线接入可由独立 AP 提供。
 
-为控制资源占用，关闭无线子系统和 NSS 加速，回收不用的 16 MiB NSS 保留内存；使用 64 KiB RAM 日志、1000 条 DNS 缓存和上限 64 MiB 的 zram。zram 使用实际 RAM 保存压缩页，并不增加物理内存。实际占用取决于连接数、代理规则及流量，本项目不承诺千兆加密代理吞吐。
+为控制资源占用，关闭无线子系统和 NSS 加速，回收不用的 16 MiB NSS 保留内存；使用 64 KiB RAM 日志、1000 条 DNS 缓存和上限 64 MiB 的 zram。zram 将内存页压缩后保存在 RAM 中，实际资源占用随连接数、代理规则和流量变化。
 
-仅支持 ZN-M2，构建目标为 `qualcommax/ipq60xx`、设备为 `zn_m2`。首次从原厂系统刷入、不同引导程序或分区布局的兼容性尚未验证，刷机前请阅读 [安装说明](docs/INSTALL.md)。
+目标设备为 ZN-M2，构建目标为 `qualcommax/ipq60xx`、设备为 `zn_m2`。刷机步骤及设备要求见 [安装说明](docs/INSTALL.md)。
 
 ## 编译
 
-使用 Linux x86_64、Python 3.10+ 和普通用户；建议至少 16 GiB RAM、60 GiB 可用空间。构建目录路径不能包含空格，需要能够访问 GitHub、Go 下载站和软件包源码站。
+使用 Linux x86_64、Python 3.10+ 和普通用户；建议至少 16 GiB RAM、60 GiB 可用空间。选择不含空格的构建路径，并确保能够访问 GitHub、Go 下载站和软件包源码站。
 
 Ubuntu 22.04 / 24.04 的依赖安装示例：
 
@@ -45,7 +45,7 @@ python3 tests/check_repository.py
 python3 scripts/build.py --work-dir /path/to/znm2-build --jobs 8
 ```
 
-脚本会自动获取锁定版本的源码、应用补丁、准备配置、编译并检查镜像。不要以 root 运行构建脚本；内存较少时降低 `--jobs` 并行度。
+使用普通用户运行构建脚本，它会自动获取锁定版本的源码、应用补丁、准备配置、编译并检查镜像；内存较少时降低 `--jobs` 并行度。
 
 构建结果位于：
 
@@ -54,7 +54,7 @@ python3 scripts/build.py --work-dir /path/to/znm2-build --jobs 8
 /path/to/znm2-build/verification/result.json
 ```
 
-已运行兼容 OpenWrt 的设备通常使用 `*-sysupgrade.bin`，具体操作和配置备份方式见 [安装说明](docs/INSTALL.md)。构建脚本不会自动刷机。只准备源码、使用下载缓存、继续构建和修改配置的方法见 [构建说明](docs/BUILD.md)。
+已运行兼容 OpenWrt 的设备通常使用 `*-sysupgrade.bin`，具体操作和配置备份方式见 [安装说明](docs/INSTALL.md)。源码准备、下载缓存、继续构建和修改配置的方法见 [构建说明](docs/BUILD.md)。
 
 ## 首次配置
 
